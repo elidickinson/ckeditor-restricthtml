@@ -1,7 +1,7 @@
 (function()
 {
 
-
+    var needsRedraw = false;
     var allowedAttribs = "id|class|style|title"; // these are always allowed
     var allowedTags;
     // list allowed tags plus any additional attributes
@@ -30,6 +30,7 @@
         'span': '',
         'code': '',
         'pre': '',
+        'h1': '',
         'h2': '',
         'h3': '',
         'h4': '',
@@ -50,6 +51,23 @@
            }
         }
         return false;
+    }
+
+    var redrawTimer = false;
+    function redrawEditor(editor) {
+        // setTimeout(function(ed) { ed.setData(ed.getData()) })
+        if(!editor.config.restricthtml_aggressive) { return; }
+        if(redrawTimer) { return; }
+
+        // console.log("redraw kickoff");
+        redrawTimer = setTimeout(function() {
+                // console.log("redraw");
+                var data = editor.getData();
+                if(data) {
+                    editor.setData(data);
+                }
+                redrawTimer = false;
+            }, 50);
     }
 
     CKEDITOR.plugins.add( 'restricthtml',
@@ -79,24 +97,8 @@
             else {
                 allowedTags = masterAllowedTags;
             }
-            // if ( htmlFilter )
-            // {
-            //     htmlFilter.addRules(
-            //         {
-            //             elements : 
-            //             {
-            //                 strong : function(element)
-            //                 {
-            //                     return false;
-            //                 },
-            //             }
-            //         });
-            // }
 
-            if ( dataFilter )
-            {
-                dataFilter.addRules(
-                    {
+            var myRules = {
                         elements : {
                             $ : function( element )
                             {
@@ -119,7 +121,7 @@
                                         {
                                             if (arrContains(validAttribs,attribName))
                                             {
-                                                // do nothing; allowed element
+                                                // do nothing; allowed attrib
                                             }
                                             else
                                             {
@@ -135,7 +137,9 @@
                                 if (!handledTag)
                                 {
                                     // remove element without nuking its children
+                                    // console.log("delete "+ element.name);
                                     delete element.name;
+                                    redrawEditor(editor);
                                 }
                                 return element;
                             },
@@ -149,11 +153,22 @@
                             }
                         }
                     }
-                );
+
+            if ( dataFilter )
+            {
+                // input - orig
+                dataFilter.addRules(myRules);
+            }
+            if ( htmlFilter )
+            {
+                // output
+                htmlFilter.addRules(myRules);
             }
         }
     });
 })();
 
 CKEDITOR.config.restricthtml = true;
-CKEDITOR.config.restricthtml_allowed_tags = '';
+// CKEDITOR.config.restricthtml_one_line = false;
+CKEDITOR.config.restricthtml_aggressive = false;
+CKEDITOR.config.restricthtml_allowed_tags = ''; // if blank allows anything in masterAllowedTags defined above
