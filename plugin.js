@@ -1,7 +1,6 @@
 (function()
 {
 
-    var needsRedraw = false;
     var allowedTags;
     // list allowed tags plus any additional attributes
     var masterAllowedTags = {
@@ -124,7 +123,7 @@
                                             else
                                             {
                                                 // remove attrib
-                                                console.log("remove "+attribName);
+                                                // console.log("remove "+attribName);
                                                 delete element.attributes[attribName];
                                             }
                                         }
