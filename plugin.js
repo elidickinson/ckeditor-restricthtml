@@ -2,7 +2,6 @@
 {
 
     var needsRedraw = false;
-    var allowedAttribs = "id|class|style|title"; // these are always allowed
     var allowedTags;
     // list allowed tags plus any additional attributes
     var masterAllowedTags = {
@@ -103,14 +102,13 @@
                             $ : function( element )
                             {
                                 var attribs = element.attributes;
+                                var validAttribs = config.restricthtml_allowed_attribs.split(',')
                                 var handledTag = false;
                                 // attrData = split(attrData, '|');
                                 for (tagName in allowedTags)
                                 {
                                     if(element.name == tagName)
                                     {
-                                        var validAttribs = allowedAttribs.split('|');
-                                       
                                         if(allowedTags[tagName]) 
                                         {
                                             validAttribs = validAttribs.concat(allowedTags[tagName].split('|'))
@@ -126,6 +124,7 @@
                                             else
                                             {
                                                 // remove attrib
+                                                console.log("remove "+attribName);
                                                 delete element.attributes[attribName];
                                             }
                                         }
@@ -172,3 +171,4 @@ CKEDITOR.config.restricthtml = true;
 // CKEDITOR.config.restricthtml_one_line = false;
 CKEDITOR.config.restricthtml_aggressive = false;
 CKEDITOR.config.restricthtml_allowed_tags = ''; // if blank allows anything in masterAllowedTags defined above
+CKEDITOR.config.restricthtml_allowed_attribs = 'id,class,style,title'; // allowed for all allowed tags
